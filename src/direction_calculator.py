@@ -1,7 +1,7 @@
 # direction_calculator.py
 
 import math
-from graph_map import MARKER_COORDS
+from .graph_map import MARKER_COORDS
 
 def calculate_direction(current_node, next_node):
     """

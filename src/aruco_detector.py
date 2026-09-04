@@ -3,11 +3,11 @@ import cv2.aruco as aruco
 
 import tkinter as tk
 from threading import Thread
-from sample_map import MARKER_LOCATIONS, TRANSITION_NODES
-from direction_calculator import calculate_direction, calculate_distance
-from path_config import compute_path
-from graph_map import GRAPH
-from gui_navigation import NavigationGUI
+from .sample_map import MARKER_LOCATIONS, TRANSITION_NODES
+from .direction_calculator import calculate_direction, calculate_distance
+from .path_config import compute_path
+from .graph_map import GRAPH
+from .gui_navigation import NavigationGUI
 
 ARROWS = {
     "LEFT": "<--",

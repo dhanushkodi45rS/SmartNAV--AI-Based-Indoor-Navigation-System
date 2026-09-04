@@ -1,8 +1,8 @@
 # path_config.py
 
-from graph_map import GRAPH
-from a_star import a_star
-from sample_map import TRANSITION_NODES
+from .graph_map import GRAPH
+from .a_star import a_star
+from .sample_map import TRANSITION_NODES
 
 # Marker IDs
 START = 0

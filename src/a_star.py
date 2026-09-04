@@ -2,7 +2,7 @@
 
 import heapq
 import math
-from graph_map import MARKER_COORDS
+from .graph_map import MARKER_COORDS
 
 def heuristic(a, b):
     """Euclidean distance heuristic"""

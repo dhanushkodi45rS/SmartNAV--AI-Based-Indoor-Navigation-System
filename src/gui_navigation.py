@@ -2,7 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk, messagebox
-from sample_map import MARKER_LOCATIONS
+from .sample_map import MARKER_LOCATIONS
 
 class NavigationGUI:
     def __init__(self, root):
