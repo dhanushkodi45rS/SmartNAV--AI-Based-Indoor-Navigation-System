@@ -1,0 +1,1172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>MGRNav — AR Indoor Building Navigation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --bg-dark: #070d14;
+        --bg-card: rgba(18, 28, 42, 0.75);
+        --bg-card-border: rgba(255, 255, 255, 0.12);
+        --accent: #10b981;
+        --accent-glow: rgba(16, 185, 129, 0.4);
+        --accent-dark: #059669;
+        --primary: #3b82f6;
+        --primary-glow: rgba(59, 130, 246, 0.4);
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --text-main: #f3f4f6;
+        --text-muted: #9ca3af;
+        --radius: 20px;
+        --font-heading: 'Outfit', sans-serif;
+        --font-body: 'Plus Jakarta Sans', sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      body {
+        font-family: var(--font-body);
+        background-color: var(--bg-dark);
+        color: var(--text-main);
+        min-height: 100vh;
+        overflow-x: hidden;
+        background-image: 
+          radial-gradient(circle at 15% 15%, rgba(16, 185, 129, 0.15) 0%, transparent 40%),
+          radial-gradient(circle at 85% 85%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+          radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.9) 0%, #070d14 100%);
+        background-attachment: fixed;
+      }
+
+      .app-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(7, 13, 20, 0.85);
+        backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--bg-card-border);
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+      }
+
+      .brand-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--accent), var(--primary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        color: white;
+        font-size: 1.1rem;
+        box-shadow: 0 0 15px var(--accent-glow);
+      }
+
+      .brand-title {
+        font-family: var(--font-heading);
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: white;
+        letter-spacing: -0.02em;
+      }
+
+      .brand-subtitle {
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .badge-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(52, 211, 153, 0.3);
+      }
+
+      .badge-status .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background-color: #34d399;
+        box-shadow: 0 0 8px #34d399;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.2); }
+      }
+
+      .container {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 20px 16px 100px;
+      }
+
+      .view-section {
+        display: none;
+        animation: fadeIn 0.3s ease-out forwards;
+      }
+
+      .view-section.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      /* HERO SECTION */
+      .hero-card {
+        background: var(--bg-card);
+        border: 1px solid var(--bg-card-border);
+        border-radius: var(--radius);
+        padding: 28px 24px;
+        backdrop-filter: blur(12px);
+        margin-bottom: 24px;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      }
+
+      .hero-tag {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 12px;
+      }
+
+      .hero-title {
+        font-family: var(--font-heading);
+        font-size: clamp(1.8rem, 5vw, 2.5rem);
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 12px;
+        background: linear-gradient(135deg, #ffffff 40%, #94a3b8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .hero-desc {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 24px;
+        max-width: 480px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .action-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        padding: 16px 24px;
+        border-radius: 16px;
+        font-family: var(--font-body);
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+        color: white;
+        box-shadow: 0 8px 25px var(--accent-glow);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px var(--accent-glow);
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text-main);
+        border: 1px solid var(--bg-card-border);
+      }
+
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      /* LOCATION STATUS BADGE */
+      .current-loc-banner {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-radius: 16px;
+        padding: 14px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+
+      .loc-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .loc-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: var(--accent);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+      }
+
+      .loc-name {
+        font-weight: 700;
+        font-size: 0.95rem;
+      }
+
+      .loc-floor {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+      }
+
+      /* DESTINATION CARDS & FILTER */
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
+
+      .section-title {
+        font-family: var(--font-heading);
+        font-size: 1.2rem;
+        font-weight: 700;
+      }
+
+      .search-box {
+        position: relative;
+        margin-bottom: 16px;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 14px 16px 14px 44px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--bg-card-border);
+        border-radius: 14px;
+        color: white;
+        font-size: 0.95rem;
+        outline: none;
+      }
+
+      .search-input:focus {
+        border-color: var(--accent);
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+      }
+
+      .floor-filter {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 12px;
+        margin-bottom: 16px;
+        scrollbar-width: none;
+      }
+
+      .floor-filter::-webkit-scrollbar { display: none; }
+
+      .floor-chip {
+        padding: 8px 16px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--bg-card-border);
+        color: var(--text-muted);
+        font-size: 0.82rem;
+        font-weight: 600;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+
+      .floor-chip.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        box-shadow: 0 0 12px var(--primary-glow);
+      }
+
+      .dest-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 12px;
+      }
+
+      .dest-card {
+        background: var(--bg-card);
+        border: 1px solid var(--bg-card-border);
+        border-radius: 16px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .dest-card:hover {
+        border-color: var(--accent);
+        background: rgba(16, 185, 129, 0.08);
+        transform: translateY(-2px);
+      }
+
+      .dest-main {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .dest-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+      }
+
+      .dest-title {
+        font-weight: 700;
+        font-size: 0.95rem;
+      }
+
+      .dest-meta {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+      }
+
+      .floor-badge {
+        font-size: 0.72rem;
+        padding: 3px 8px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        color: #d1d5db;
+        font-weight: 600;
+      }
+
+      /* CAMERA AR VIEW HUD */
+      .ar-viewport {
+        position: relative;
+        width: 100%;
+        height: 60vh;
+        max-height: 520px;
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: #000;
+        border: 1px solid var(--bg-card-border);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        margin-bottom: 16px;
+      }
+
+      #camera-feed {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .ar-overlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 16px;
+      }
+
+      .ar-header-hud {
+        background: rgba(7, 13, 20, 0.75);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--bg-card-border);
+        border-radius: 16px;
+        padding: 14px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .nav-arrow-huge {
+        font-size: 2.2rem;
+        color: #34d399;
+        text-shadow: 0 0 15px #34d399;
+        animation: bounce 1.5s infinite;
+      }
+
+      @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+      }
+
+      .nav-text-main {
+        font-family: var(--font-heading);
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: white;
+      }
+
+      .nav-text-sub {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+      }
+
+      .ar-scanner-reticle {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 220px;
+        height: 220px;
+        border: 2px dashed rgba(16, 185, 129, 0.6);
+        border-radius: 24px;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .ar-scanner-line {
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #10b981, transparent);
+        animation: scanline 2.5s infinite linear;
+      }
+
+      @keyframes scanline {
+        0% { top: 0%; }
+        50% { top: 100%; }
+        100% { top: 0%; }
+      }
+
+      .ar-footer-hud {
+        background: rgba(7, 13, 20, 0.85);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--bg-card-border);
+        border-radius: 16px;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .progress-bar-wrap {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 6px;
+      }
+
+      .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--primary));
+        width: 0%;
+        transition: width 0.4s ease;
+      }
+
+      /* ROUTE STEPS DRAWER */
+      .route-card {
+        background: var(--bg-card);
+        border: 1px solid var(--bg-card-border);
+        border-radius: var(--radius);
+        padding: 20px;
+        backdrop-filter: blur(12px);
+        margin-bottom: 20px;
+      }
+
+      .step-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 14px;
+      }
+
+      .step-item {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        padding: 14px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        transition: all 0.2s ease;
+      }
+
+      .step-item.active {
+        background: rgba(16, 185, 129, 0.12);
+        border-color: rgba(16, 185, 129, 0.4);
+      }
+
+      .step-item.completed {
+        opacity: 0.6;
+      }
+
+      .step-num {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+      }
+
+      .step-item.active .step-num {
+        background: var(--accent);
+        box-shadow: 0 0 10px var(--accent-glow);
+      }
+
+      .step-details {
+        flex: 1;
+      }
+
+      .step-instr {
+        font-weight: 600;
+        font-size: 0.92rem;
+      }
+
+      .step-sub {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+      }
+
+      /* SIMULATOR TOOLBAR */
+      .sim-toolbar {
+        background: rgba(18, 28, 42, 0.95);
+        border: 1px solid var(--bg-card-border);
+        border-radius: 16px;
+        padding: 14px 18px;
+        margin-top: 16px;
+      }
+
+      .sim-title {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .sim-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .sim-btn {
+        padding: 6px 12px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--bg-card-border);
+        color: white;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .sim-btn:hover {
+        background: var(--primary);
+      }
+
+      /* MODAL */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .modal-backdrop.active {
+        display: flex;
+      }
+
+      .modal-box {
+        background: #0f172a;
+        border: 1px solid var(--bg-card-border);
+        border-radius: 24px;
+        padding: 28px;
+        max-width: 440px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-icon-big {
+        width: 64px;
+        height: 64px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin: 0 auto 16px;
+        box-shadow: 0 0 25px var(--accent-glow);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- App Header -->
+    <header class="app-header">
+      <a href="#" class="brand" onclick="goToView('hero-view')">
+        <div class="brand-icon">M</div>
+        <div>
+          <div class="brand-title">MGRNav</div>
+          <div class="brand-subtitle">Indoor Navigation</div>
+        </div>
+      </a>
+      <div class="badge-status">
+        <div class="dot"></div>
+        <span id="header-status">Ready</span>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- VIEW 1: HERO / LANDING -->
+      <section id="hero-view" class="view-section active">
+        <div class="hero-card">
+          <span class="hero-tag">Smart Building AR</span>
+          <h1 class="hero-title">Navigate Buildings Effortlessly</h1>
+          <p class="hero-desc">
+            Scan entrance markers with your camera to instantly pinpoint your location and follow live AR turn-by-turn directions.
+          </p>
+
+          <div class="action-stack">
+            <button class="btn btn-primary" onclick="openEntranceScanner()">
+              <span>📷</span> Scan Entrance Marker / QR
+            </button>
+            <button class="btn btn-secondary" onclick="goToView('destination-view')">
+              <span>📍</span> Choose Location Manually
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 2: ENTRANCE SCANNER MODAL / VIEW -->
+      <section id="scanner-view" class="view-section">
+        <div class="hero-card" style="padding: 20px;">
+          <div class="section-header">
+            <div class="section-title">Scan Entrance Marker</div>
+            <button class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.8rem;" onclick="goToView('hero-view')">Cancel</button>
+          </div>
+          <p class="hero-desc" style="font-size: 0.85rem; margin-bottom: 14px;">
+            Point device camera at any entrance ArUco marker or QR code to detect your starting point.
+          </p>
+
+          <div class="ar-viewport" style="height: 380px;">
+            <video id="entrance-cam" autoplay playsinline muted></video>
+            <div class="ar-overlay">
+              <div class="ar-scanner-reticle">
+                <div class="ar-scanner-line"></div>
+              </div>
+              <div class="ar-footer-hud">
+                <span id="entrance-scan-status">Searching for Entrance Marker...</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sim-toolbar">
+            <div class="sim-title">
+              <span>Test Scanner (Manual Override)</span>
+            </div>
+            <div class="sim-buttons" id="entrance-sim-btns">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: DESTINATION SELECTION -->
+      <section id="destination-view" class="view-section">
+        <div class="current-loc-banner" id="current-loc-bar">
+          <div class="loc-info">
+            <div class="loc-icon">📍</div>
+            <div>
+              <div class="loc-name" id="user-current-name">Start: Dept Entrance</div>
+              <div class="loc-floor" id="user-current-floor">Floor 3 • ID: 1</div>
+            </div>
+          </div>
+          <button class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.78rem;" onclick="goToView('scanner-view')">Change</button>
+        </div>
+
+        <div class="section-header">
+          <div class="section-title">Select Destination</div>
+          <span style="font-size: 0.8rem; color: var(--text-muted);" id="dest-count-label">21 locations</span>
+        </div>
+
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="search-dest" placeholder="Search rooms, labs, lifts..." oninput="filterDestinations()">
+        </div>
+
+        <div class="floor-filter" id="floor-filter-bar">
+          <button class="floor-chip active" onclick="filterFloor('ALL', this)">All Floors</button>
+          <button class="floor-chip" onclick="filterFloor(0, this)">Ground Floor</button>
+          <button class="floor-chip" onclick="filterFloor(1, this)">1st Floor</button>
+          <button class="floor-chip" onclick="filterFloor(2, this)">2nd Floor</button>
+          <button class="floor-chip" onclick="filterFloor(3, this)">3rd Floor</button>
+        </div>
+
+        <div class="dest-grid" id="dest-grid">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+      <!-- VIEW 4: LIVE AR NAVIGATION HUD -->
+      <section id="navigation-view" class="view-section">
+        <div class="ar-viewport">
+          <video id="camera-feed" autoplay playsinline muted></video>
+          <canvas id="camera-canvas" style="display: none;"></canvas>
+
+          <div class="ar-overlay">
+            <div class="ar-header-hud">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <div class="nav-arrow-huge" id="ar-arrow">↑</div>
+                <div>
+                  <div class="nav-text-main" id="ar-instruction">Go straight</div>
+                  <div class="nav-text-sub" id="ar-target-sub">Next target: HOD Room</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ar-scanner-reticle" id="nav-reticle">
+              <div class="ar-scanner-line"></div>
+            </div>
+
+            <div class="ar-footer-hud">
+              <div>
+                <div style="font-size: 0.8rem; font-weight: 700; color: white;" id="ar-dist-text">Distance: 5.0m</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted);" id="ar-scan-status">Scanning ArUco...</div>
+              </div>
+              <button class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.75rem; background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #fca5a5;" onclick="stopNavigation()">Exit</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="route-card">
+          <div class="section-header" style="margin-bottom: 8px;">
+            <div class="section-title" style="font-size: 1rem;">Route Progress</div>
+            <span style="font-size: 0.8rem; color: var(--accent); font-weight: 700;" id="progress-text">Step 1 of 5</span>
+          </div>
+
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="progress-fill"></div>
+          </div>
+
+          <ul class="step-list" id="active-step-list">
+            <!-- Steps inserted here -->
+          </ul>
+        </div>
+
+        <!-- SIMULATION CONTROL TOOLBAR -->
+        <div class="sim-toolbar">
+          <div class="sim-title">
+            <span>Desktop Simulator (Click Marker to Advance)</span>
+          </div>
+          <div class="sim-buttons" id="nav-sim-btns">
+            <!-- Simulation buttons inserted here -->
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- DESTINATION REACHED MODAL -->
+    <div class="modal-backdrop" id="completion-modal">
+      <div class="modal-box">
+        <div class="modal-icon-big">🎉</div>
+        <h2 style="font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 8px;">Destination Reached!</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;" id="completion-desc">
+          You have arrived at HOD Room.
+        </p>
+        <button class="btn btn-primary" onclick="closeModalAndReset()">Done / New Route</button>
+      </div>
+    </div>
+
+    <script>
+      // Global Navigation State
+      let allDestinations = [];
+      let currentStartId = 1; // Default to Dept Entrance (1)
+      let currentDestId = null;
+      let activeRoute = null;
+      let currentStepIndex = 0;
+      let activeStream = null;
+      let scanInterval = null;
+      let activeFloorFilter = 'ALL';
+
+      // Elements
+      const headerStatus = document.getElementById('header-status');
+      const destGrid = document.getElementById('dest-grid');
+      const userCurrentName = document.getElementById('user-current-name');
+      const userCurrentFloor = document.getElementById('user-current-floor');
+
+      // Initialize
+      window.addEventListener('DOMContentLoaded', () => {
+        loadDestinations();
+      });
+
+      async function loadDestinations() {
+        try {
+          const res = await fetch('/api/destinations');
+          allDestinations = await res.json();
+          renderDestinations();
+          renderEntranceSimButtons();
+        } catch (err) {
+          console.error("Failed to load destinations", err);
+        }
+      }
+
+      function goToView(viewId) {
+        document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+        const target = document.getElementById(viewId);
+        if (target) target.classList.add('active');
+
+        if (viewId !== 'navigation-view' && viewId !== 'scanner-view') {
+          stopCamera();
+        }
+      }
+
+      function renderEntranceSimButtons() {
+        const container = document.getElementById('entrance-sim-btns');
+        container.innerHTML = '';
+        allDestinations.forEach(item => {
+          const btn = document.createElement('button');
+          btn.className = 'sim-btn';
+          btn.textContent = `${item.name} (${item.id})`;
+          btn.onclick = () => selectEntranceMarker(item.id);
+          container.appendChild(btn);
+        });
+      }
+
+      function renderDestinations() {
+        destGrid.innerHTML = '';
+        const search = document.getElementById('search-dest').value.toLowerCase();
+
+        const filtered = allDestinations.filter(item => {
+          const matchesSearch = item.name.toLowerCase().includes(search) || item.id.toString().includes(search);
+          const matchesFloor = activeFloorFilter === 'ALL' || item.floor === activeFloorFilter;
+          return matchesSearch && matchesFloor;
+        });
+
+        document.getElementById('dest-count-label').textContent = `${filtered.length} locations`;
+
+        filtered.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'dest-card';
+          card.onclick = () => selectDestination(item.id);
+
+          const icon = item.is_transition ? '🛗' : (item.floor === 0 ? '🏢' : '🚪');
+
+          card.innerHTML = `
+            <div class="dest-main">
+              <div class="dest-avatar">${icon}</div>
+              <div>
+                <div class="dest-title">${item.name}</div>
+                <div class="dest-meta">Marker ID: ${item.id}</div>
+              </div>
+            </div>
+            <span class="floor-badge">Floor ${item.floor}</span>
+          `;
+          destGrid.appendChild(card);
+        });
+      }
+
+      function filterFloor(floorVal, el) {
+        activeFloorFilter = floorVal;
+        document.querySelectorAll('.floor-chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        renderDestinations();
+      }
+
+      function filterDestinations() {
+        renderDestinations();
+      }
+
+      // ENTRANCE SCANNER
+      async function openEntranceScanner() {
+        goToView('scanner-view');
+        startCamera('entrance-cam');
+      }
+
+      function selectEntranceMarker(markerId) {
+        currentStartId = markerId;
+        const startItem = allDestinations.find(d => d.id === markerId) || { name: `Marker ${markerId}`, floor: 0 };
+        userCurrentName.textContent = `Start: ${startItem.name}`;
+        userCurrentFloor.textContent = `Floor ${startItem.floor} • ID: ${markerId}`;
+        headerStatus.textContent = `Location: ${startItem.name}`;
+        
+        stopCamera();
+        goToView('destination-view');
+      }
+
+      // CAMERA MANAGEMENT
+      async function startCamera(videoElemId) {
+        const video = document.getElementById(videoElemId);
+        try {
+          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            activeStream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: 'environment' }
+            });
+            video.srcObject = activeStream;
+          }
+        } catch (err) {
+          console.warn("Camera access failed or unavailable, using fallback preview", err);
+        }
+
+        // Start scanning loop if navigating
+        if (videoElemId === 'camera-feed') {
+          scanInterval = setInterval(processFrameForMarkers, 2000);
+        }
+      }
+
+      function stopCamera() {
+        if (scanInterval) {
+          clearInterval(scanInterval);
+          scanInterval = null;
+        }
+        if (activeStream) {
+          activeStream.getTracks().forEach(track => track.stop());
+          activeStream = null;
+        }
+      }
+
+      // ROUTE COMPUTATION & AR NAVIGATION
+      async function selectDestination(destId) {
+        currentDestId = destId;
+        
+        try {
+          const res = await fetch('/api/route', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ start: currentStartId, destination: currentDestId })
+          });
+
+          if (!res.ok) {
+            alert("No route found for selected destination.");
+            return;
+          }
+
+          activeRoute = await res.json();
+          currentStepIndex = 0;
+          
+          startNavigation();
+        } catch (err) {
+          alert("Error calculating route");
+        }
+      }
+
+      function startNavigation() {
+        goToView('navigation-view');
+        startCamera('camera-feed');
+        updateHUD();
+        renderSimButtons();
+      }
+
+      function updateHUD() {
+        if (!activeRoute || !activeRoute.steps) return;
+
+        const currentStep = activeRoute.steps[currentStepIndex];
+        const isLast = currentStepIndex === activeRoute.steps.length - 1;
+
+        document.getElementById('ar-arrow').textContent = currentStep.arrow || '↑';
+        document.getElementById('ar-instruction').textContent = currentStep.instruction;
+        document.getElementById('ar-target-sub').textContent = isLast 
+          ? `Destination: ${currentStep.location}` 
+          : `Next Target: ${currentStep.location}`;
+
+        document.getElementById('ar-dist-text').textContent = currentStep.distance_m > 0
+          ? `Distance: ${currentStep.distance_m}m`
+          : `Floor ${currentStep.floor}`;
+
+        // Progress
+        const pct = Math.round(((currentStepIndex + 1) / activeRoute.steps.length) * 100);
+        document.getElementById('progress-fill').style.width = `${pct}%`;
+        document.getElementById('progress-text').textContent = `Step ${currentStepIndex + 1} of ${activeRoute.steps.length}`;
+
+        // Render step list
+        const list = document.getElementById('active-step-list');
+        list.innerHTML = '';
+
+        activeRoute.steps.forEach((step, idx) => {
+          const li = document.createElement('li');
+          li.className = 'step-item';
+          if (idx === currentStepIndex) li.classList.add('active');
+          if (idx < currentStepIndex) li.classList.add('completed');
+
+          li.innerHTML = `
+            <div class="step-num">${idx + 1}</div>
+            <div class="step-details">
+              <div class="step-instr">${step.instruction}</div>
+              <div class="step-sub">Marker ID: ${step.marker_id} • Floor ${step.floor}</div>
+            </div>
+            <div style="font-size: 1.2rem;">${step.arrow || '✓'}</div>
+          `;
+          list.appendChild(li);
+        });
+
+        // Check completion
+        if (currentStepIndex >= activeRoute.steps.length - 1) {
+          setTimeout(() => {
+            document.getElementById('completion-desc').textContent = `You have arrived at ${activeRoute.destination.name}.`;
+            document.getElementById('completion-modal').classList.add('active');
+          }, 800);
+        }
+      }
+
+      function renderSimButtons() {
+        const container = document.getElementById('nav-sim-btns');
+        container.innerHTML = '';
+        
+        activeRoute.steps.forEach((step, idx) => {
+          const btn = document.createElement('button');
+          btn.className = 'sim-btn';
+          if (idx === currentStepIndex) btn.style.background = 'var(--accent)';
+          btn.textContent = `Reach: ${step.location} (${step.marker_id})`;
+          btn.onclick = () => simulateScanMarker(step.marker_id);
+          container.appendChild(btn);
+        });
+      }
+
+      function simulateScanMarker(markerId) {
+        document.getElementById('ar-scan-status').textContent = `Scanned Marker ${markerId}!`;
+        
+        // Find if this marker matches current expected step
+        const expectedStep = activeRoute.steps[currentStepIndex];
+        if (expectedStep && expectedStep.marker_id === markerId) {
+          if (currentStepIndex < activeRoute.steps.length - 1) {
+            currentStepIndex++;
+            updateHUD();
+            renderSimButtons();
+          } else {
+            updateHUD();
+          }
+        } else {
+          // Check if scanned any future step
+          const matchIdx = activeRoute.steps.findIndex((s, i) => i > currentStepIndex && s.marker_id === markerId);
+          if (matchIdx !== -1) {
+            currentStepIndex = matchIdx;
+            updateHUD();
+            renderSimButtons();
+          }
+        }
+      }
+
+      async function processFrameForMarkers() {
+        const video = document.getElementById('camera-feed');
+        if (!video || !video.videoWidth) return;
+
+        const canvas = document.getElementById('camera-canvas');
+        canvas.width = 320;
+        canvas.height = 240;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const base64Img = canvas.toDataURL('image/jpeg', 0.6);
+
+        try {
+          const res = await fetch('/api/detect_marker', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: base64Img })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            if (data.markers && data.markers.length > 0) {
+              const detected = data.markers[0].id;
+              simulateScanMarker(detected);
+            }
+          }
+        } catch (e) {
+          // Ignore background errors
+        }
+      }
+
+      function stopNavigation() {
+        stopCamera();
+        goToView('destination-view');
+      }
+
+      function closeModalAndReset() {
+        document.getElementById('completion-modal').classList.remove('active');
+        stopCamera();
+        goToView('hero-view');
+      }
+    </script>
+  </body>
+</html>
+
