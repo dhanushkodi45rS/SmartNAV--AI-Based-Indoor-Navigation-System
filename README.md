@@ -1,5 +1,7 @@
 # MGRNav — AR-Powered Indoor Building Navigation System
 
+## Live Demo -- https://smartnav-ai-based-indoor-navigation.onrender.com/
+
 > **Zero-install, browser-based AR indoor navigation system using ArUco markers and A* pathfinding.**
 
 ---
