@@ -2,9 +2,9 @@ import base64
 import numpy as np
 from flask import Flask, jsonify, render_template, request
 
-from direction_calculator import calculate_direction, calculate_distance
-from path_config import compute_path
-from sample_map import MARKER_LOCATIONS, MARKER_FLOORS, TRANSITION_NODES
+from .direction_calculator import calculate_direction, calculate_distance
+from .path_config import compute_path
+from .sample_map import MARKER_LOCATIONS, MARKER_FLOORS, TRANSITION_NODES
 
 try:
     import cv2
@@ -177,5 +177,7 @@ def detect_marker():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
-
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000))
+    )
